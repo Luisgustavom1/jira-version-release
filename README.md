@@ -1,6 +1,6 @@
 ## Jira version release
 
-This is an integration with jira versions. When a version is released, you can choose a channel on slack or discord to release release notes for that version. All automated, just post the version and the messages with the related tasks and description are posted
+This is an integration with jira versions. When a version is released, you can choose a channel in slack or discord to publish release notes for your newest project version🥳🎉🎊. All automated, just post the version and the messages with the related tasks and description are posted
 
 The format of the message is the same as when you copy from jira, but with an added version description at the top
 
