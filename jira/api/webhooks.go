@@ -7,16 +7,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Luisgustavom1/release-notes-bot/configs"
 	"github.com/Luisgustavom1/release-notes-bot/jira"
 	"github.com/Luisgustavom1/release-notes-bot/jira/entity"
 )
 
 func SubscribeInWebhook(j *jira.JiraConnect) {
-	jiraURL := configs.GetEnv("MY_JIRA_URL")
-
 	jiraWebhookSubscribe, err := json.Marshal(map[string]any{
-		"name":   "release notes webhook",
+		"name":   "release-notes-bot",
 		"url":    "https://d630-177-106-118-8.sa.ngrok.io/webhooks",
 		"events": []string{"jira:version_released"},
 	})
@@ -27,7 +24,7 @@ func SubscribeInWebhook(j *jira.JiraConnect) {
 
 	res, err := j.NewJiraRequest(
 		"POST",
-		jiraURL+"/rest/webhooks/1.0/webhook",
+		"/webhooks/1.0/webhook",
 		bytes.NewBuffer(jiraWebhookSubscribe),
 	)
 	if err != nil {
@@ -36,6 +33,20 @@ func SubscribeInWebhook(j *jira.JiraConnect) {
 	}
 
 	fmt.Println("Subscribed -> ", res.StatusCode)
+}
+
+func ListAllWebhooks(j *jira.JiraConnect) *http.Response {
+	res, err := j.NewJiraRequest(
+		"GET",
+		"/webhooks/1.0/webhook",
+		nil,
+	)
+	if err != nil {
+		log.Fatalf(err.Error())
+		return nil
+	}
+
+	return res
 }
 
 func ListenWebhook[K entity.JiraWebhookVersion](ch chan K) {

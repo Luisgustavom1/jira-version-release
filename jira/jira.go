@@ -3,6 +3,8 @@ package jira
 import (
 	"io"
 	"net/http"
+
+	"github.com/Luisgustavom1/release-notes-bot/configs"
 )
 
 type JiraConnect struct {
@@ -15,11 +17,11 @@ func Connect(jiraAuthentication string) *JiraConnect {
 	}
 }
 
-func (j *JiraConnect) NewJiraRequest(method string, url string, body io.Reader) (*http.Response, error) {
+func (j *JiraConnect) NewJiraRequest(method string, path string, body io.Reader) (*http.Response, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(
 		method,
-		url,
+		configs.GetEnv("MY_JIRA_URL")+"/rest"+path,
 		body,
 	)
 	if err != nil {
