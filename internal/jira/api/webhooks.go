@@ -7,14 +7,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Luisgustavom1/release-notes-bot/jira"
-	"github.com/Luisgustavom1/release-notes-bot/jira/entity"
+	"github.com/Luisgustavom1/release-notes-bot/internal/jira"
+	"github.com/Luisgustavom1/release-notes-bot/internal/jira/entity"
 )
+
+const VERSION_WEBHOOK_NAME = "release-notes-bot"
 
 func SubscribeInWebhook(j *jira.JiraConnect) {
 	jiraWebhookSubscribe, err := json.Marshal(map[string]any{
-		"name":   "release-notes-bot",
-		"url":    "https://d630-177-106-118-8.sa.ngrok.io/webhooks",
+		"name":   VERSION_WEBHOOK_NAME,
+		"url":    "https://d9e9-177-106-90-21.sa.ngrok.io/webhooks",
 		"events": []string{"jira:version_released"},
 	})
 	if err != nil {
@@ -35,7 +37,7 @@ func SubscribeInWebhook(j *jira.JiraConnect) {
 	fmt.Println("Subscribed -> ", res.StatusCode)
 }
 
-func ListAllWebhooks(j *jira.JiraConnect) *http.Response {
+func ListAllWebhooks[K entity.JiraWebhook](j *jira.JiraConnect) []K {
 	res, err := j.NewJiraRequest(
 		"GET",
 		"/webhooks/1.0/webhook",
@@ -46,7 +48,14 @@ func ListAllWebhooks(j *jira.JiraConnect) *http.Response {
 		return nil
 	}
 
-	return res
+	var versions []K
+	err = json.NewDecoder(res.Body).Decode(&versions)
+	if err != nil {
+		log.Fatalf("Cannot parse response!")
+		return nil
+	}
+
+	return versions
 }
 
 func ListenWebhook[K entity.JiraWebhookVersion](ch chan K) {
@@ -59,7 +68,6 @@ func ListenWebhook[K entity.JiraWebhookVersion](ch chan K) {
 		var jiraWebhookVersion K
 		err := json.NewDecoder(r.Body).Decode(&jiraWebhookVersion)
 		if err != nil {
-			log.Fatalf(err.Error())
 			http.Error(w, "Cannot parse response!", http.StatusBadRequest)
 			return
 		}

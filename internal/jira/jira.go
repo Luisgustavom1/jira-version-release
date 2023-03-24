@@ -24,6 +24,7 @@ func (j *JiraConnect) NewJiraRequest(method string, path string, body io.Reader)
 		configs.GetEnv("MY_JIRA_URL")+"/rest"+path,
 		body,
 	)
+
 	if err != nil {
 		return nil, err
 	}
