@@ -41,7 +41,7 @@ func InitDiscordBot() {
 
 func alreadySubscribeInVersionWebhook(j *jira.JiraConnect) bool {
 	alreadySubscribe := false
-	versions := api.ListAllWebhooks(j)
+	versions := api.ListWebhooks(j)
 
 	for _, v := range versions {
 		if v.Name == api.VERSION_WEBHOOK_NAME {

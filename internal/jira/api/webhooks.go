@@ -37,7 +37,7 @@ func SubscribeInWebhook(j *jira.JiraConnect) {
 	fmt.Println("Subscribed -> ", res.StatusCode)
 }
 
-func ListAllWebhooks[K entity.JiraWebhook](j *jira.JiraConnect) []K {
+func ListWebhooks[K entity.JiraWebhook](j *jira.JiraConnect) []K {
 	res, err := j.NewJiraRequest(
 		"GET",
 		"/webhooks/1.0/webhook",
