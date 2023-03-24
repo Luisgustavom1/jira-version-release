@@ -1,4 +1,4 @@
-package jira
+package api
 
 import (
 	"bytes"
@@ -8,10 +8,11 @@ import (
 	"net/http"
 
 	"github.com/Luisgustavom1/release-notes-bot/configs"
+	"github.com/Luisgustavom1/release-notes-bot/jira"
 	"github.com/Luisgustavom1/release-notes-bot/jira/entity"
 )
 
-func SubscribeInWebhook(j *JiraConnect) {
+func SubscribeInWebhook(j *jira.JiraConnect) {
 	jiraURL := configs.GetEnv("MY_JIRA_URL")
 
 	jiraWebhookSubscribe, err := json.Marshal(map[string]any{

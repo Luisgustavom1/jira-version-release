@@ -1,15 +1,5 @@
 package entity
 
-type JiraVersionLink struct {
-	Self string `json:"self"`
-	Name string `json:"name"`
-	Link struct {
-		GlobalId             string   `json:"globalId"`
-		MyCustomLinkProperty bool     `json:"myCustomLinkProperty"`
-		Colors               []string `json:"colors"`
-	} `json:"link"`
-}
-
 type JiraVersion struct {
 	Self            string `json:"self"`
 	Id              string `json:"id"`

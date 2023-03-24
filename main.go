@@ -8,6 +8,7 @@ import (
 	"github.com/Luisgustavom1/release-notes-bot/configs"
 	"github.com/Luisgustavom1/release-notes-bot/discord"
 	"github.com/Luisgustavom1/release-notes-bot/jira"
+	jira_api "github.com/Luisgustavom1/release-notes-bot/jira/api"
 	"github.com/Luisgustavom1/release-notes-bot/jira/entity"
 )
 
@@ -26,11 +27,11 @@ func main() {
 	discordSession := discord.Connect()
 
 	http.HandleFunc("/register/webhooks/release_notes", func(w http.ResponseWriter, r *http.Request) {
-		jira.SubscribeInWebhook(jiraConnection)
+		jira_api.SubscribeInWebhook(jiraConnection)
 	})
 
 	jiraVersion := make(chan entity.JiraWebhookVersion)
-	go jira.ListenWebhook(jiraVersion)
+	go jira_api.ListenWebhook(jiraVersion)
 
 	go func() {
 		select {
