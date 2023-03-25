@@ -92,9 +92,6 @@ func issuesGroupByType[T []entity.JiraIssue](issues T) IssuesGroupByType {
 	groupedIssues := IssuesGroupByType{}
 
 	for _, issue := range issues {
-		if len(groupedIssues[issue.Fields.IssueType.Name]) == 0 {
-			groupedIssues[issue.Fields.IssueType.Name] = T{issue}
-		}
 		groupedIssues[issue.Fields.IssueType.Name] = append(groupedIssues[issue.Fields.IssueType.Name], issue)
 	}
 
