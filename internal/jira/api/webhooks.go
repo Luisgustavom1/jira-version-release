@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Luisgustavom1/release-notes-bot/configs"
 	"github.com/Luisgustavom1/release-notes-bot/internal/jira"
 	"github.com/Luisgustavom1/release-notes-bot/internal/jira/entity"
 )
@@ -16,7 +17,7 @@ const VERSION_WEBHOOK_NAME = "release-notes-bot"
 func SubscribeInWebhook(j *jira.JiraConnect) {
 	jiraWebhookSubscribe, err := json.Marshal(map[string]any{
 		"name":   VERSION_WEBHOOK_NAME,
-		"url":    "https://d9e9-177-106-90-21.sa.ngrok.io/webhooks",
+		"url":    configs.GetEnv("BOT_URL") + "/webhooks",
 		"events": []string{"jira:version_released"},
 	})
 	if err != nil {

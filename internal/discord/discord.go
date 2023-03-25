@@ -13,7 +13,7 @@ func Connect() *discordgo.Session {
 	if err != nil {
 		log.Panicln(err)
 	}
-
+	
 	return discord
 }
 
