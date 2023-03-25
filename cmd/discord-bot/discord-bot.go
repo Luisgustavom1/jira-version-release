@@ -39,11 +39,17 @@ func InitDiscordBot() {
 				if err != nil {
 					log.Fatalln(err)
 				}
-	
+
+				project, err := api.ListProjectByProjectId(jiraConnection, webhookVersion.Version.ProjectId)
+				if err != nil {
+					log.Fatalln(err)
+				}
+
 				discord.SendChannelMessage(
 					discordSession,
 					"notes",
 					formatReleaseNotesMessage(
+						project.Name,
 						issuesGroupByType(issuesSearched.Issues),
 						webhookVersion.Version,
 					),
@@ -66,20 +72,19 @@ func alreadySubscribeInVersionWebhook(j *jira.JiraConnect) bool {
 	return alreadySubscribe
 }
 
-func formatReleaseNotesMessage(issues IssuesGroupByType, version entity.JiraVersion) string {
-	header := fmt.Sprintln("# Release notes -", "Project name", "-", version.Name)
-	description := version.Description
+func formatReleaseNotesMessage(projectName string, issues IssuesGroupByType, version entity.JiraVersion) string {
+	header := fmt.Sprintln("# Release notes -", projectName, "-", version.Name)
+	description := "\n" + version.Description + "\n"
 	issuesList := ""
 
 	for issueType := range issues {
-		issuesList += fmt.Sprintln("\n", "###", issueType)
-		issuesList += "\n"
+		issuesList += fmt.Sprint("\n", "### ", issueType, "\n\n")
 
 		for _, issue := range issues[issueType] {
 			issuesList += fmt.Sprint("[", issue.Key, "]", "(", issue.Fields.IssueType.Self, ") ", issue.Fields.Summary, "\n\n")
 		}
 	}
-	
+
 	return fmt.Sprintln(header, description, issuesList)
 }
 
