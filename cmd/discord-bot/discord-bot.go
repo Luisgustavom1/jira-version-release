@@ -2,6 +2,8 @@ package discord_bot
 
 import (
 	"encoding/base64"
+	"fmt"
+	"log"
 
 	"github.com/Luisgustavom1/release-notes-bot/configs"
 	"github.com/Luisgustavom1/release-notes-bot/internal/discord"
@@ -9,6 +11,8 @@ import (
 	"github.com/Luisgustavom1/release-notes-bot/internal/jira/api"
 	"github.com/Luisgustavom1/release-notes-bot/internal/jira/entity"
 )
+
+type IssuesGroupByType = map[string][]entity.JiraIssue
 
 func InitDiscordBot() {
 	jiraApiToken := configs.GetEnv("JIRA_API_TOKEN")
@@ -28,13 +32,23 @@ func InitDiscordBot() {
 	go api.ListenWebhook(jiraVersion)
 
 	go func() {
-		select {
-		case version := <-jiraVersion:
-			discord.SendChannelMessage(
-				discordSession,
-				"notes",
-				version.Version.Description,
-			)
+		for {
+			select {
+			case webhookVersion := <-jiraVersion:
+				issuesSearched, err := api.ListIssuesByVersionId(jiraConnection, webhookVersion.Version.Id)
+				if err != nil {
+					log.Fatalln(err)
+				}
+	
+				discord.SendChannelMessage(
+					discordSession,
+					"notes",
+					formatReleaseNotesMessage(
+						issuesGroupByType(issuesSearched.Issues),
+						webhookVersion.Version,
+					),
+				)
+			}
 		}
 	}()
 }
@@ -50,4 +64,34 @@ func alreadySubscribeInVersionWebhook(j *jira.JiraConnect) bool {
 	}
 
 	return alreadySubscribe
+}
+
+func formatReleaseNotesMessage(issues IssuesGroupByType, version entity.JiraVersion) string {
+	header := fmt.Sprintln("# Release notes -", "Project name", "-", version.Name)
+	description := version.Description
+	issuesList := ""
+
+	for issueType := range issues {
+		issuesList += fmt.Sprintln("\n", "###", issueType)
+		issuesList += "\n"
+
+		for _, issue := range issues[issueType] {
+			issuesList += fmt.Sprint("[", issue.Key, "]", "(", issue.Fields.IssueType.Self, ") ", issue.Fields.Summary, "\n\n")
+		}
+	}
+	
+	return fmt.Sprintln(header, description, issuesList)
+}
+
+func issuesGroupByType[T []entity.JiraIssue](issues T) IssuesGroupByType {
+	groupedIssues := IssuesGroupByType{}
+
+	for _, issue := range issues {
+		if len(groupedIssues[issue.Fields.IssueType.Name]) == 0 {
+			groupedIssues[issue.Fields.IssueType.Name] = T{issue}
+		}
+		groupedIssues[issue.Fields.IssueType.Name] = append(groupedIssues[issue.Fields.IssueType.Name], issue)
+	}
+
+	return groupedIssues
 }
